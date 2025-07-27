@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>弹跳的蛋和居中Logo</title>
+  <style>
+    html,body{
+      width:100vw;height:100vh;padding:0;margin:0;overflow:hidden;
+      background:linear-gradient(to bottom right,#fff,#ffe680);
+    }
+    canvas{
+      position:absolute;left:0;top:0;width:100vw;height:100vh;display:block;
+    }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  const EGG_SRC = "egg.png";
+  const LOGO_SRC = "logo.png";
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  let dpr = window.devicePixelRatio || 1;
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  // 蛋参数
+  let eggW = 120, eggH = 160;
+  let ex = 100, ey = 200, dx = 2, dy = 2;
+
+  // logo参数
+  let logoW = 400, logoH = 0;
+
+  // 图片加载
+  const eggImg = new Image();
+  const logoImg = new Image();
+  eggImg.src = EGG_SRC;
+  logoImg.src = LOGO_SRC;
+
+  let loaded = 0;
+  eggImg.onload = logoImg.onload = function(){
+    loaded++;
+    if(loaded === 2) requestAnimationFrame(loop);
+  };
+
+  function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // 画logo（居中放大）
+    if(logoImg.complete){
+      logoW = Math.min(400, canvas.width/dpr*0.8);
+      logoH = logoImg.height * (logoW/logoImg.width);
+      ctx.save();
+      ctx.globalAlpha = 1;
+      ctx.drawImage(
+        logoImg,
+        (canvas.width-logoW*dpr)/2,
+        (canvas.height-logoH*dpr)/2,
+        logoW*dpr,
+        logoH*dpr
+      );
+      ctx.restore();
+    }
+
+    // 画蛋
+    if(eggImg.complete){
+      ctx.save();
+      ctx.globalAlpha = 1;
+      ctx.drawImage(
+        eggImg,
+        ex*dpr,
+        ey*dpr,
+        eggW*dpr,
+        eggH*dpr
+      );
+      ctx.restore();
+    }
+
+    // 蛋弹跳
+    ex += dx;
+    ey += dy;
+    const maxX = canvas.width/dpr - eggW;
+    const maxY = canvas.height/dpr - eggH;
+    if(ex<=0){ex=0;dx=-dx;}
+    if(ex>=maxX){ex=maxX;dx=-dx;}
+    if(ey<=0){ey=0;dy=-dy;}
+    if(ey>=maxY){ey=maxY;dy=-dy;}
+
+    requestAnimationFrame(loop);
+  }
+</script>
+</body>
+</html>
